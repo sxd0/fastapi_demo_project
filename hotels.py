@@ -1,7 +1,8 @@
+from typing import Annotated
 from fastapi import Path, Query, Body, APIRouter
-from pydantic import BaseModel, Field
 import uvicorn
 
+from dependencies import PaginationDep
 from schemas.hotels import Hotel, HotelPATCH
 
 
@@ -13,8 +14,9 @@ hotels = [
     {"id": 2, "title": "Dubai", "name": "dubai"},
 ]
 
-@router.get("/")
+@router.get("")
 def get_hotels(
+    pagination: PaginationDep,
     id: int | None = Query(None, description="Айди"),
     title: str | None = Query(None, description="Название отеля"),
 ):
@@ -25,11 +27,25 @@ def get_hotels(
         if title and hotel["title"] != title:
             continue
         hotels_.append(hotel)
+    
+    if pagination.page and pagination.per_page:
+        return hotels_[pagination.per_page * (pagination.page - 1):][:pagination.per_page]
     return hotels_
 
 
 @router.post("/")
-def create_hotel(hotel_data: Hotel):
+def create_hotel(hotel_data: Hotel = Body(openapi_examples={
+    "1": {"summary": "sochi", "value": {
+        "title": "Отель сочи 5 звезд", 
+        "name": "Sochi_Plaza"
+    }},
+    "2": {
+        "summary": "dubai", "value": {
+            "title": "Отель Дубай у фонтана",
+            "name": "dubai_fountain"
+        }},
+    }),
+):
     global hotels
     hotels.append({
         "id": hotels[-1]["id"] + 1,
