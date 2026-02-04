@@ -1,9 +1,8 @@
-from typing import Annotated
 from fastapi import Path, Query, Body, APIRouter
 import uvicorn
 
-from dependencies import PaginationDep
-from schemas.hotels import Hotel, HotelPATCH
+from src.api.dependencies import PaginationDep
+from src.schemas.hotels import Hotel, HotelPATCH
 
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
