@@ -3,7 +3,7 @@ POSTGRES_USER = postgres
 DB_NAME = booking
 SERVICE_NAME = db
 
-.PHONY: up down db bash logs migrate upgrade downgrade
+.PHONY: up down uvi db bash logs migrate upgrade downgrade
 
 up:
 	colima start
@@ -13,6 +13,10 @@ up:
 down:
 	$(DC) down
 	colima stop
+
+
+uvi:
+	poetry run uvicorn src.main:app --reload
 
 
 db:
@@ -28,12 +32,12 @@ logs:
 
 
 migrate: ### EXAMPLE: make migrate m="..."
-	PYTHONPATH=. alembic revision --autogenerate -m "$(m)"
+	PYTHONPATH=. poetry run alembic revision --autogenerate -m "$(m)"
 
 
 upgrade:
-	PYTHONPATH=. alembic upgrade head
+	PYTHONPATH=. poetry run alembic upgrade head
 
 
 downgrade:
-	PYTHONPATH=. alembic downgrade -1
+	PYTHONPATH=. poetry run alembic downgrade -1
