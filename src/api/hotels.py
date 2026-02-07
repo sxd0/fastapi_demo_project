@@ -39,13 +39,13 @@ async def get_hotels(
 @router.post("")
 async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
     "1": {"summary": "sochi", "value": {
-        "title": "Отель сочи 5 звезд", 
-        "location": "ул. Моря 12"
+        "title": "Отель у моря 5 звезд", 
+        "location": "Сочи, ул. Моря 12"
     }},
     "2": {
         "summary": "dubai", "value": {
-            "title": "Отель Дубай у фонтана",
-            "location": "ул. Дубай 5"
+            "title": "Отель у фонтана",
+            "location": "Дубай, ул. Дубай 5"
         }},
     }),
 ):
