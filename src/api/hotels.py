@@ -1,12 +1,10 @@
 from fastapi import Path, Query, Body, APIRouter
 import uvicorn
-from sqlalchemy import insert, select
 
 from src.database import async_session_maker
 from src.api.dependencies import PaginationDep
-from src.models.hotels import HotelsOrm
 from src.repositories.hotels import HotelsRepository
-from src.schemas.hotels import Hotel, HotelPATCH
+from src.schemas.hotels import Hotel, HotelAdd, HotelPATCH
 
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
@@ -29,7 +27,7 @@ async def get_hotels(
 
 
 @router.post("")
-async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
+async def create_hotel(hotel_data: HotelAdd = Body(openapi_examples={
     "1": {"summary": "sochi", "value": {
         "title": "Отель у моря 5 звезд", 
         "location": "Сочи, ул. Моря 12"
@@ -42,43 +40,39 @@ async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
     }),
 ):
     async with async_session_maker() as session:
-        add_hotel_stmt = insert(HotelsOrm).values(**hotel_data.model_dump())
-        await session.execute(add_hotel_stmt)
+        hotel = await HotelsRepository(session).add(hotel_data)
         await session.commit()
 
-    return {"status": "ok"}
+    return {"status": "ok", "data": hotel}
 
 
 @router.patch("/{hotel_id}", summary="Частичное обновление данных отеля", description="Тут частично обновляем данные об отели")
-def partially_edit_hotel(
+async def partially_edit_hotel(
     hotel_data: HotelPATCH,
     hotel_id: int = Path(description="Номер отеля которые будет отредактирован частично"),
 ):
-    global hotels
-    hotel = [hotel for hotel in hotels if hotel["id"] == hotel_id][0]
-    if hotel_data.title:
-        hotel["title"] = hotel_data.title
-    if hotel_data.name:
-        hotel["name"] = hotel_data.name
+    async with async_session_maker() as session:
+        await HotelsRepository(session).edit(hotel_data, exclude_unset=True, id=hotel_id)
+        await session.commit()
     return {"status": "ok"}
 
 
 @router.put("/{hotel_id}")
-def edit_hotel(
-    hotel_data: Hotel,
+async def edit_hotel(
+    hotel_data: HotelAdd,
     hotel_id: int = Path(description="Номер отеля которые будет отредактирован полностью"),
 ):
-    global hotels
-    hotel = [hotel for hotel in hotels if hotel["id"] == hotel_id][0]
-    hotel["title"] = hotel_data.title
-    hotel["name"] = hotel_data.name
+    async with async_session_maker() as session:
+        await HotelsRepository(session).edit(hotel_data, id=hotel_id)
+        await session.commit()
     return {"status": "ok"}
 
 
 @router.delete("/{hotel_id}")
-def delete_hotel(hotel_id: int):
-    global hotels
-    hotels = [hotel for hotel in hotels if hotel["id"] != hotel_id]
+async def delete_hotel(hotel_id: int):
+    async with async_session_maker() as session:
+        await HotelsRepository(session).delete(id=hotel_id)
+        await session.commit()
     return {"status": "ok"}
 
 
