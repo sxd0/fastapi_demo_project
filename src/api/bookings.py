@@ -1,7 +1,7 @@
-from fastapi import Path, Query, Body, APIRouter
-from src.api.dependencies import DBDep, PaginationDep, UserIdDep
+from fastapi import Path, APIRouter
+from src.api.dependencies import DBDep, UserIdDep
 from src.schemas.bookings import BookingAdd, BookingAddRequest
-from src.schemas.hotels import Hotel, HotelAdd, HotelPATCH
+from src.schemas.hotels import HotelAdd, HotelPATCH
 
 
 router = APIRouter(prefix="/bookings", tags=["Бронирования"])

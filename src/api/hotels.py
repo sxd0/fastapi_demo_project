@@ -1,11 +1,8 @@
 from datetime import date
 from fastapi import Path, Query, Body, APIRouter
-import uvicorn
 
-from src.database import async_session_maker
 from src.api.dependencies import DBDep, PaginationDep
-from src.repositories.hotels import HotelsRepository
-from src.schemas.hotels import Hotel, HotelAdd, HotelPATCH
+from src.schemas.hotels import HotelAdd, HotelPATCH
 
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])

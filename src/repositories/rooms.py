@@ -1,5 +1,3 @@
-from sqlalchemy import func, select
-from src.models.bookings import BookingsOrm
 from src.models.rooms import RoomsOrm
 from src.repositories.base import BaseRepository
 from src.repositories.utils import rooms_ids_for_booking

@@ -1,11 +1,7 @@
-from datetime import datetime, timedelta, timezone
-import jwt
 
-from fastapi import APIRouter, HTTPException, Response, Request
-from passlib.context import CryptContext
+from fastapi import APIRouter, HTTPException, Response
 
 from src.api.dependencies import UserIdDep
-from src.config import settings
 from src.repositories.users import UsersRepository
 from src.schemas.users import UserAdd, UserRequestAdd
 from src.database import async_session_maker
