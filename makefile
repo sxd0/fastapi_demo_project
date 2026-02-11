@@ -45,3 +45,4 @@ downgrade:
 pretty:
 	ruff check --fix
 	ruff format
+	pyright
