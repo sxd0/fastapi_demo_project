@@ -10,12 +10,14 @@ router = APIRouter(prefix="/rooms", tags=["Номера"])
 
 @router.get("/{hotel_id}/rooms")
 async def get_rooms(
-        hotel_id: int,
-        db: DBDep,
-        date_from: date = Query(examples=["2024-08-01"]),
-        date_to: date = Query(examples=["2024-08-10"]),
-    ):
-    return await db.rooms.get_filtered_by_time(hotel_id=hotel_id, date_from=date_from, date_to=date_to)
+    hotel_id: int,
+    db: DBDep,
+    date_from: date = Query(examples=["2024-08-01"]),
+    date_to: date = Query(examples=["2024-08-10"]),
+):
+    return await db.rooms.get_filtered_by_time(
+        hotel_id=hotel_id, date_from=date_from, date_to=date_to
+    )
 
 
 @router.get("/{hotel_id}/rooms/{room_id}")
@@ -34,10 +36,7 @@ async def create_rooms(hotel_id: int, db: DBDep, room_data: RoomAddRequest = Bod
 
 @router.patch("/{hotel_id}/rooms/{room_id}")
 async def partially_edit_room(
-    hotel_id: int,
-    db: DBDep,
-    room_id: int,
-    room_data: RoomPATCHRequest
+    hotel_id: int, db: DBDep, room_id: int, room_data: RoomPATCHRequest
 ):
     _room_data = RoomAdd(hotel_id=hotel_id, **room_data.model_dump(exclude_unset=True))
     await db.rooms.edit(_room_data, exclude_unset=True, id=room_id, hotel_id=hotel_id)

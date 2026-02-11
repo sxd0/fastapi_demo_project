@@ -24,22 +24,28 @@ async def get_hotels(
         location=location,
         title=title,
         limit=per_page or 5,
-        offset=per_page * (pagination.page - 1)
+        offset=per_page * (pagination.page - 1),
     )
 
 
 @router.post("")
-async def create_hotel(db: DBDep, hotel_data: HotelAdd = Body(openapi_examples={
-    "1": {"summary": "sochi", "value": {
-        "title": "Отель у моря 5 звезд", 
-        "location": "Сочи, ул. Моря 12"
-    }},
-    "2": {
-        "summary": "dubai", "value": {
-            "title": "Отель у фонтана",
-            "location": "Дубай, ул. Дубай 5"
-        }},
-    }),
+async def create_hotel(
+    db: DBDep,
+    hotel_data: HotelAdd = Body(
+        openapi_examples={
+            "1": {
+                "summary": "sochi",
+                "value": {
+                    "title": "Отель у моря 5 звезд",
+                    "location": "Сочи, ул. Моря 12",
+                },
+            },
+            "2": {
+                "summary": "dubai",
+                "value": {"title": "Отель у фонтана", "location": "Дубай, ул. Дубай 5"},
+            },
+        }
+    ),
 ):
 
     hotel = await db.hotels.add(hotel_data)
@@ -48,11 +54,17 @@ async def create_hotel(db: DBDep, hotel_data: HotelAdd = Body(openapi_examples={
     return {"status": "ok", "data": hotel}
 
 
-@router.patch("/{hotel_id}", summary="Частичное обновление данных отеля", description="Тут частично обновляем данные об отели")
+@router.patch(
+    "/{hotel_id}",
+    summary="Частичное обновление данных отеля",
+    description="Тут частично обновляем данные об отели",
+)
 async def partially_edit_hotel(
     db: DBDep,
     hotel_data: HotelPATCH,
-    hotel_id: int = Path(description="Номер отеля которые будет отредактирован частично"),
+    hotel_id: int = Path(
+        description="Номер отеля которые будет отредактирован частично"
+    ),
 ):
     await db.hotels.edit(hotel_data, exclude_unset=True, id=hotel_id)
     await db.commit()
@@ -63,7 +75,9 @@ async def partially_edit_hotel(
 async def edit_hotel(
     db: DBDep,
     hotel_data: HotelAdd,
-    hotel_id: int = Path(description="Номер отеля которые будет отредактирован полностью"),
+    hotel_id: int = Path(
+        description="Номер отеля которые будет отредактирован полностью"
+    ),
 ):
     await db.hotels.edit(hotel_data, id=hotel_id)
     await db.commit()

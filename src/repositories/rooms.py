@@ -8,7 +8,6 @@ class RoomsRepository(BaseRepository):
     model = RoomsOrm
     schema = Room
 
-
     async def get_filtered_by_time(
         self,
         hotel_id,

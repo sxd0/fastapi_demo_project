@@ -41,3 +41,7 @@ upgrade:
 
 downgrade:
 	PYTHONPATH=. poetry run alembic downgrade -1
+
+pretty:
+	ruff check --fix
+	ruff format
