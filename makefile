@@ -3,7 +3,7 @@ POSTGRES_USER = postgres
 DB_NAME = booking
 SERVICE_NAME = db
 
-.PHONY: up down uvi db bash logs migrate upgrade downgrade
+.PHONY: up down uvi db bash logs migrate upgrade downgrade pretty
 
 up:
 	colima start

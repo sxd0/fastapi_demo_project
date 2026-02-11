@@ -42,9 +42,7 @@ async def add_booking(user_id: UserIdDep, db: DBDep, booking_data: BookingAddReq
 async def partially_edit_hotel(
     db: DBDep,
     hotel_data: HotelPATCH,
-    hotel_id: int = Path(
-        description="Номер отеля которые будет отредактирован частично"
-    ),
+    hotel_id: int = Path(description="Номер отеля которые будет отредактирован частично"),
 ):
     await db.hotels.edit(hotel_data, exclude_unset=True, id=hotel_id)
     await db.commit()
@@ -55,9 +53,7 @@ async def partially_edit_hotel(
 async def edit_hotel(
     db: DBDep,
     hotel_data: HotelAdd,
-    hotel_id: int = Path(
-        description="Номер отеля которые будет отредактирован полностью"
-    ),
+    hotel_id: int = Path(description="Номер отеля которые будет отредактирован полностью"),
 ):
     await db.hotels.edit(hotel_data, id=hotel_id)
     await db.commit()

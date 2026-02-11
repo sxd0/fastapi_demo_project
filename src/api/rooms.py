@@ -35,9 +35,7 @@ async def create_rooms(hotel_id: int, db: DBDep, room_data: RoomAddRequest = Bod
 
 
 @router.patch("/{hotel_id}/rooms/{room_id}")
-async def partially_edit_room(
-    hotel_id: int, db: DBDep, room_id: int, room_data: RoomPATCHRequest
-):
+async def partially_edit_room(hotel_id: int, db: DBDep, room_id: int, room_data: RoomPATCHRequest):
     _room_data = RoomAdd(hotel_id=hotel_id, **room_data.model_dump(exclude_unset=True))
     await db.rooms.edit(_room_data, exclude_unset=True, id=room_id, hotel_id=hotel_id)
     await db.commit()
