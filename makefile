@@ -48,4 +48,4 @@ pretty:
 	pyright
 
 test:
-	pytest -v
+	pytest -v --disable-warnings
