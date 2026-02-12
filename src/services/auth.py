@@ -6,7 +6,7 @@ from src.config import settings
 
 
 class AuthService:
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
     def create_access_token(self, data: dict) -> str:
         to_encode = data.copy()
