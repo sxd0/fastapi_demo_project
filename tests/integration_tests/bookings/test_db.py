@@ -1,8 +1,5 @@
 from datetime import date
 from src.schemas.bookings import BookingAdd
-from src.schemas.hotels import HotelAdd
-from src.utils.db_manager import DBManager
-from src.database import async_session_maker_null_pool
 
 
 async def test_booking_crud(db):
@@ -13,7 +10,7 @@ async def test_booking_crud(db):
         room_id=room_id,
         date_from=date(year=2024, month=8, day=10),
         date_to=date(year=2024, month=8, day=20),
-        price=100
+        price=100,
     )
 
     new_booking = await db.bookings.add(booking_data)

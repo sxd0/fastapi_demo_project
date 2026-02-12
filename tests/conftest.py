@@ -2,7 +2,6 @@ import json
 import pytest
 from src.api.dependencies import get_db
 from src.database import Base, engine_null_pool, async_session_maker_null_pool
-from src.models import *
 from src.config import settings
 from httpx import ASGITransport, AsyncClient
 from src.main import app
@@ -25,6 +24,7 @@ async def get_db_null_pool():
 async def db():
     async for db in get_db_null_pool():
         yield db
+
 
 app.dependency_overrides[get_db] = get_db_null_pool
 
@@ -63,5 +63,5 @@ async def register_user(setup_database, ac):
         json={
             "email": "kot@pes.com",
             "password": "1234",
-        }
+        },
     )

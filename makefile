@@ -3,7 +3,7 @@ POSTGRES_USER = postgres
 DB_NAME = booking
 SERVICE_NAME = db
 
-.PHONY: up down uvi db bash logs migrate upgrade downgrade pretty test
+.PHONY: up down uvi db bash logs migrate upgrade downgrade pretty pretty-validate test
 
 up:
 	colima start
@@ -45,6 +45,9 @@ downgrade:
 pretty:
 	ruff check --fix
 	ruff format
+
+pretty-validate:
+	make pretty
 	pyright
 
 test:
