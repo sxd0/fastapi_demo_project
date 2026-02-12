@@ -8,7 +8,7 @@ from src.config import settings
 class AuthService:
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-    def create_access_token(data: dict) -> str:
+    def create_access_token(self, data: dict) -> str:
         to_encode = data.copy()
         expire = datetime.now(timezone.utc) + timedelta(
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
