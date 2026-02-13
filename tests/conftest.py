@@ -78,4 +78,3 @@ async def authenticated_ac(register_user, ac):
     )
     assert ac.cookies["access_token"]
     yield ac
-    
