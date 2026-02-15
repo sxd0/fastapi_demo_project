@@ -1,68 +1,31 @@
-from fastapi import Path, APIRouter
-from src.api.dependencies import DBDep, UserIdDep
-from src.schemas.bookings import BookingAdd, BookingAddRequest
-from src.schemas.hotels import HotelAdd, HotelPATCH
+from fastapi import APIRouter
 
+from src.api.dependencies import DBDep, UserIdDep
+from src.exceptions import AllRoomsAreBookedException, AllRoomsAreBookedHTTPException
+from src.schemas.bookings import BookingAddRequest
+from src.services.bookings import BookingService
 
 router = APIRouter(prefix="/bookings", tags=["Бронирования"])
 
 
 @router.get("")
 async def get_bookings(db: DBDep):
-    return await db.bookings.get_all()
+    return await BookingService(db).get_bookings()
 
 
 @router.get("/me")
-async def get_me_bookings(user_id: UserIdDep, db: DBDep):
-    return await db.bookings.get_filtered(user_id=user_id)
+async def get_my_bookings(user_id: UserIdDep, db: DBDep):
+    return await BookingService(db).get_my_bookings(user_id)
 
 
 @router.post("")
-async def add_booking(user_id: UserIdDep, db: DBDep, booking_data: BookingAddRequest):
-    room = await db.rooms.get_one_or_none(id=booking_data.room_id)
-    hotel = await db.hotels.get_one_or_none(id=room.hotel_id)
-    room_price = room.price
-
-    _booking_data = BookingAdd(
-        user_id=user_id,
-        price=room_price,
-        **booking_data.model_dump(),
-    )
-
-    booking = await db.bookings.add_booking(_booking_data, hotel_id=hotel.id)
-    await db.commit()
-
-    return {"status": "ok", "data": booking}
-
-
-@router.patch(
-    "/{hotel_id}",
-    summary="Частичное обновление данных отеля",
-    description="Тут частично обновляем данные об отели",
-)
-async def partially_edit_hotel(
+async def add_booking(
+    user_id: UserIdDep,
     db: DBDep,
-    hotel_data: HotelPATCH,
-    hotel_id: int = Path(description="Номер отеля которые будет отредактирован частично"),
+    booking_data: BookingAddRequest,
 ):
-    await db.hotels.edit(hotel_data, exclude_unset=True, id=hotel_id)
-    await db.commit()
-    return {"status": "ok"}
-
-
-@router.put("/{hotel_id}")
-async def edit_hotel(
-    db: DBDep,
-    hotel_data: HotelAdd,
-    hotel_id: int = Path(description="Номер отеля которые будет отредактирован полностью"),
-):
-    await db.hotels.edit(hotel_data, id=hotel_id)
-    await db.commit()
-    return {"status": "ok"}
-
-
-@router.delete("/{hotel_id}")
-async def delete_hotel(db: DBDep, hotel_id: int):
-    await db.hotels.delete(id=hotel_id)
-    await db.commit()
-    return {"status": "ok"}
+    try:
+        booking = await BookingService(db).add_booking(user_id, booking_data)
+    except AllRoomsAreBookedException:
+        raise AllRoomsAreBookedHTTPException
+    return {"status": "OK", "data": booking}

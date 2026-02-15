@@ -6,7 +6,7 @@ authors = [
     {name = "sxd0",email = "fancityfun@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<4.0"
 dependencies = [
     "alembic (==1.18.3)",
     "annotated-doc (==0.0.4)",
@@ -15,6 +15,7 @@ dependencies = [
     "asyncpg (==0.31.0)",
     "click (==8.3.1)",
     "fastapi (==0.128.0)",
+    "fastapi-cache2[redis]>=0.2.2",
     "greenlet (==3.3.1)",
     "h11 (==0.16.0)",
     "idna (==3.11)",
@@ -39,7 +40,9 @@ dependencies = [
     "pytest-dotenv (>=0.5.2,<0.6.0)",
     "pytest-asyncio (>=1.3.0,<2.0.0)",
     "httpx (>=0.28.1,<0.29.0)",
-    "argon2-cffi (>=25.1.0,<26.0.0)"
+    "argon2-cffi (>=25.1.0,<26.0.0)",
+    "pillow (>=12.1.1,<13.0.0)",
+    "python-multipart (>=0.0.22,<0.0.23)"
 ]
 
 

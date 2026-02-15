@@ -1,31 +1,41 @@
 from datetime import date
-from fastapi import Path, Query, Body, APIRouter
 
-from src.api.dependencies import DBDep, PaginationDep
-from src.schemas.hotels import HotelAdd, HotelPATCH
+from fastapi import Query, APIRouter, Body
+from fastapi_cache.decorator import cache
 
+from src.api.dependencies import PaginationDep, DBDep
+from src.exceptions import ObjectNotFoundException, HotelNotFoundHTTPException
+from src.schemas.hotels import HotelPatch, HotelAdd
+from src.services.hotels import HotelService
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 
 
 @router.get("")
+@cache(expire=10)
 async def get_hotels(
     pagination: PaginationDep,
     db: DBDep,
-    location: int | None = Query(None, description="Локация"),
+    location: str | None = Query(None, description="Локация"),
     title: str | None = Query(None, description="Название отеля"),
-    date_from: date = Query(examples=["2024-08-01"]),
-    date_to: date = Query(examples=["2024-08-10"]),
+    date_from: date = Query(examples="2024-08-01"),
+    date_to: date = Query(examples="2024-08-10"),
 ):
-    per_page = pagination.per_page or 5
-    return await db.hotels.get_filtered_by_time(
-        date_from=date_from,
-        date_to=date_to,
-        location=location,
-        title=title,
-        limit=per_page or 5,
-        offset=per_page * (pagination.page - 1),
+    return await HotelService(db).get_filtered_by_time(
+        pagination,
+        location,
+        title,
+        date_from,
+        date_to,
     )
+
+
+@router.get("/{hotel_id}")
+async def get_hotel(hotel_id: int, db: DBDep):
+    try:
+        return await HotelService(db).get_hotel(hotel_id)
+    except ObjectNotFoundException:
+        raise HotelNotFoundHTTPException
 
 
 @router.post("")
@@ -34,54 +44,47 @@ async def create_hotel(
     hotel_data: HotelAdd = Body(
         openapi_examples={
             "1": {
-                "summary": "sochi",
+                "summary": "Сочи",
                 "value": {
-                    "title": "Отель у моря 5 звезд",
-                    "location": "Сочи, ул. Моря 12",
+                    "title": "Отель Сочи 5 звезд у моря",
+                    "location": "ул. Моря, 1",
                 },
             },
             "2": {
-                "summary": "dubai",
-                "value": {"title": "Отель у фонтана", "location": "Дубай, ул. Дубай 5"},
+                "summary": "Дубай",
+                "value": {
+                    "title": "Отель Дубай У фонтана",
+                    "location": "ул. Шейха, 2",
+                },
             },
         }
     ),
 ):
+    hotel = await HotelService(db).add_hotel(hotel_data)
+    return {"status": "OK", "data": hotel}
 
-    hotel = await db.hotels.add(hotel_data)
-    await db.commit()
 
-    return {"status": "ok", "data": hotel}
+@router.put("/{hotel_id}")
+async def edit_hotel(hotel_id: int, hotel_data: HotelAdd, db: DBDep):
+    await HotelService(db).edit_hotel(hotel_id, hotel_data)
+    return {"status": "OK"}
 
 
 @router.patch(
     "/{hotel_id}",
-    summary="Частичное обновление данных отеля",
-    description="Тут частично обновляем данные об отели",
+    summary="Частичное обновление данных об отеле",
+    description="<h1>Тут мы частично обновляем данные об отеле: можно отправить name, а можно title</h1>",
 )
 async def partially_edit_hotel(
+    hotel_id: int,
+    hotel_data: HotelPatch,
     db: DBDep,
-    hotel_data: HotelPATCH,
-    hotel_id: int = Path(description="Номер отеля которые будет отредактирован частично"),
 ):
-    await db.hotels.edit(hotel_data, exclude_unset=True, id=hotel_id)
-    await db.commit()
-    return {"status": "ok"}
-
-
-@router.put("/{hotel_id}")
-async def edit_hotel(
-    db: DBDep,
-    hotel_data: HotelAdd,
-    hotel_id: int = Path(description="Номер отеля которые будет отредактирован полностью"),
-):
-    await db.hotels.edit(hotel_data, id=hotel_id)
-    await db.commit()
-    return {"status": "ok"}
+    await HotelService(db).edit_hotel_partially(hotel_id, hotel_data, exclude_unset=True)
+    return {"status": "OK"}
 
 
 @router.delete("/{hotel_id}")
-async def delete_hotel(db: DBDep, hotel_id: int):
-    await db.hotels.delete(id=hotel_id)
-    await db.commit()
-    return {"status": "ok"}
+async def delete_hotel(hotel_id: int, db: DBDep):
+    await HotelService(db).delete_hotel(hotel_id)
+    return {"status": "OK"}
